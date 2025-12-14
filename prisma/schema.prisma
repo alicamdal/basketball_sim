@@ -1,0 +1,57 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       String @id @default(uuid())
+  username String @unique
+  level    Int    @default(1)
+  xp       Int    @default(0)
+  money    BigInt @default(0)
+
+  roster    Roster?
+  createdAt DateTime @default(now())
+}
+
+model Player {
+  id       String @id @default(uuid())
+  name     String
+  pos      String
+  overall  Int
+  imageKey String
+
+  rosterItems RosterItem[]
+
+  createdAt DateTime @default(now())
+}
+
+model Roster {
+  id     String @id @default(uuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  items RosterItem[]
+
+  createdAt DateTime @default(now())
+}
+
+model RosterItem {
+  id       String @id @default(uuid())
+  rosterId String
+  roster   Roster @relation(fields: [rosterId], references: [id], onDelete: Cascade)
+
+  playerId String
+  player   Player @relation(fields: [playerId], references: [id], onDelete: Restrict)
+
+  location  String // "STARTER" | "BENCH"
+  slotIndex Int // starter: 0..4, bench: 0..N-1
+
+  updatedAt DateTime @updatedAt
+
+  @@unique([rosterId, location, slotIndex])
+}
