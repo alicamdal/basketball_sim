@@ -14,81 +14,80 @@ export function Hud({ me }: { me: MeDTO | null }) {
   const pct = Math.max(0, Math.min(100, (xp / xpToNext) * 100));
 
   // ---- LIVE CLOCK (Europe/Istanbul) ----
-  const [now, setNow] = useState<Date>(() => new Date());
+const [mounted, setMounted] = useState(false);
+const [now, setNow] = useState<Date | null>(null);
 
-  useEffect(() => {
-    const id = window.setInterval(() => setNow(new Date()), 1000);
-    return () => window.clearInterval(id);
-  }, []);
+useEffect(() => {
+  setMounted(true);
+  setNow(new Date());
+  const id = window.setInterval(() => setNow(new Date()), 1000);
+  return () => window.clearInterval(id);
+}, []);
 
-  const formatter = useMemo(() => {
-    return new Intl.DateTimeFormat("tr-TR", {
-      timeZone: "Europe/Istanbul",
-      weekday: "short",
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-    });
-  }, []);
+const formatter = useMemo(() => {
+  return new Intl.DateTimeFormat("tr-TR", {
+    timeZone: "Europe/Istanbul",
+    weekday: "short",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+}, []);
 
-  const formattedNow = formatter.format(now);
+// SSR sırasında boş string bas → hydration mismatch olmaz
+const formattedNow = mounted && now ? formatter.format(now) : "";
+
 
   return (
-    <div className="w-[360px] rounded-2xl border border-white/15 bg-black/55 p-4 text-white shadow backdrop-blur">
-      {/* TOP: LOGO + USER */}
-      <div className="flex items-center gap-4">
-        {/* TEAM LOGO */}
-        <div className="h-[72px] w-[72px] flex-shrink-0 rounded-full bg-black/40 p-1 shadow-lg">
-          <div className="relative h-full w-full overflow-hidden rounded-full">
-            <Image
-              src="/teams/logo.png"
-              alt="Team Logo"
-              fill
-              sizes="72px"
-              className="object-cover"
-              priority
-            />
-          </div>
+    <div className="inline-flex items-center gap-3 rounded-2xl border-3 border-blue-700/60 bg-gradient-to-br from-blue-700/60 via-blue-800/60 to-blue-900/60 px-4 py-3 text-white shadow-xl shadow-blue-900/50 backdrop-blur-sm">
+      {/* TEAM LOGO */}
+      <div className="h-[50px] w-[50px] flex-shrink-0 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 p-1 shadow-lg border-2 border-white/30">
+        <div className="relative h-full w-full overflow-hidden rounded-full bg-white">
+          <Image
+            src="/teams/logo.png"
+            alt="Team Logo"
+            fill
+            sizes="50px"
+            className="object-cover"
+            priority
+          />
+        </div>
+      </div>
+
+      {/* USER INFO - Compact */}
+      <div className="flex flex-col gap-1.5">
+        {/* Row 1: Username + Level */}
+        <div className="flex items-center gap-2">
+          <div className="text-sm font-black drop-shadow-md">{username}</div>
+          <div className="rounded-full bg-orange-400 px-2 py-0.5 text-[10px] font-black text-blue-900 shadow-md">Lv {level}</div>
         </div>
 
-        {/* USER INFO */}
-        <div className="flex-1">
-          <div className="flex items-center justify-between">
-            <div className="text-sm font-semibold">{username}</div>
-            <div className="text-xs opacity-80">Lv {level}</div>
+        {/* Row 2: XP Bar */}
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] font-bold drop-shadow whitespace-nowrap">XP</span>
+          <div className="h-2 w-[120px] rounded-full bg-white/20 border border-white/30 shadow-inner">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-orange-400 to-orange-500 shadow-sm transition-all duration-300"
+              style={{ width: `${pct}%` }}
+            />
           </div>
+          <span className="text-[10px] font-bold drop-shadow whitespace-nowrap">
+            {xp}/{xpToNext}
+          </span>
+        </div>
 
-          {/* XP */}
-          <div className="mt-2">
-            <div className="mb-1 flex justify-between text-xs opacity-80">
-              <span>XP</span>
-              <span>
-                {xp}/{xpToNext}
-              </span>
-            </div>
-            <div className="h-2 w-full rounded-full bg-white/15">
-              <div
-                className="h-2 rounded-full bg-emerald-400"
-                style={{ width: `${pct}%` }}
-              />
-            </div>
+        {/* Row 3: Money + Time */}
+        <div className="flex items-center gap-3 text-[10px] font-bold">
+          <div className="flex items-center gap-1">
+            <span className="drop-shadow">💰</span>
+            <span className="text-orange-300 drop-shadow">{Number(money).toLocaleString("tr-TR")} ₺</span>
           </div>
-
-          {/* MONEY */}
-          <div className="mt-2 flex items-center justify-between">
-            <div className="text-xs opacity-80">Para</div>
-            <div className="text-sm font-semibold">
-              {Number(money).toLocaleString("tr-TR")} ₺
-            </div>
-          </div>
-
-          {/* LIVE DATE/TIME */}
-          <div className="mt-2 flex items-center justify-between">
-            <div className="text-xs opacity-80">Tarih/Saat</div>
-            <div className="text-xs font-semibold tabular-nums">{formattedNow}</div>
+          <div className="flex items-center gap-1">
+            <span className="drop-shadow">🕒</span>
+            <span className="tabular-nums drop-shadow">{formattedNow}</span>
           </div>
         </div>
       </div>

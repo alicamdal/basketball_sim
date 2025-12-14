@@ -5,7 +5,9 @@ import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import type { MeDTO } from "@/lib/types";
 import { Hud } from "@/components/game/Hud";
-import { CityToggleButton } from "@/components/game/CityToggleButton";
+import { GoToCityButton } from "@/components/game/GoToCityButton";
+import { GoToCourtButton } from "@/components/game/GoToCourtButton";
+import { ChatPanel } from "@/components/game/ChatPanel";
 import { GameTransitionProvider, useGameTransition } from "@/components/game/gameTransition";
 
 import { AnimatePresence, motion } from "framer-motion";
@@ -34,21 +36,63 @@ function AnimatedScene({ children }: { children: ReactNode }) {
   // Court -> City: zoom OUT (scale down) ve fade
   const variants = {
     initial: () => {
-      // Yeni sayfa girerken küçük bir “settle” hissi
-      if (t === "toCourt") return { opacity: 0, scale: 0.96 };
-      if (t === "toCity") return { opacity: 0, scale: 1.04 };
-      return { opacity: 0, scale: 1.0 };
+      // Yeni sayfa girerken smooth bir giriş
+      if (t === "toCourt") return { opacity: 0, scale: 0.92, filter: "blur(8px)" };
+      if (t === "toCity") return { opacity: 0, scale: 1.08, filter: "blur(8px)" };
+      return { opacity: 0, scale: 1.0, filter: "blur(0px)" };
     },
-    animate: { opacity: 1, scale: 1.0, transition: { duration: 0.22, ease: "easeOut" } },
+    animate: {
+      opacity: 1,
+      scale: 1.0,
+      filter: "blur(0px)",
+      transition: {
+        duration: 0.5,
+        ease: [0.25, 0.1, 0.25, 1.0] as const, // cubic-bezier for smooth easing
+        opacity: { duration: 0.4 },
+        scale: { duration: 0.5, ease: [0.34, 1.56, 0.64, 1] as const }, // slight bounce
+        filter: { duration: 0.35 }
+      }
+    },
     exit: () => {
-      if (t === "toCourt") return { opacity: 0, scale: 1.10, transition: { duration: 0.22, ease: "easeIn" } };
-      if (t === "toCity") return { opacity: 0, scale: 0.90, transition: { duration: 0.22, ease: "easeIn" } };
-      return { opacity: 0, scale: 1.0, transition: { duration: 0.18 } };
+      if (t === "toCourt") {
+        return {
+          opacity: 0,
+          scale: 1.15,
+          filter: "blur(10px)",
+          transition: {
+            duration: 0.4,
+            ease: [0.76, 0, 0.24, 1] as const,
+            opacity: { duration: 0.3 },
+            scale: { duration: 0.4 },
+            filter: { duration: 0.3 }
+          }
+        };
+      }
+      if (t === "toCity") {
+        return {
+          opacity: 0,
+          scale: 0.85,
+          filter: "blur(10px)",
+          transition: {
+            duration: 0.4,
+            ease: [0.76, 0, 0.24, 1] as const,
+            opacity: { duration: 0.3 },
+            scale: { duration: 0.4 },
+            filter: { duration: 0.3 }
+          }
+        };
+      }
+      return {
+        opacity: 0,
+        scale: 1.0,
+        filter: "blur(5px)",
+        transition: { duration: 0.3 }
+      };
     },
   };
 
   return (
-    <AnimatePresence mode="wait" initial={false}>
+    <AnimatePresence mode="wait">
       <motion.div
         key={pathname}
         custom={{}}
@@ -67,10 +111,13 @@ function AnimatedScene({ children }: { children: ReactNode }) {
 
 export default function GameLayout({ children }: { children: ReactNode }) {
   const [me, setMe] = useState<MeDTO | null>(null);
+  const pathname = usePathname();
 
   useEffect(() => {
     getJSON<MeDTO>("/api/me").then(setMe).catch(console.error);
   }, []);
+
+  const isCity = pathname?.startsWith("/city");
 
   return (
     <GameTransitionProvider>
@@ -85,8 +132,11 @@ export default function GameLayout({ children }: { children: ReactNode }) {
           <AnimatedScene>{children}</AnimatedScene>
         </div>
 
-        {/* City/Court butonu her sahnede */}
-        <CityToggleButton />
+        {/* City/Court butonları - sayfaya göre */}
+        {isCity ? <GoToCourtButton /> : <GoToCityButton />}
+
+        {/* Chat paneli her sahnede */}
+        <ChatPanel />
       </div>
     </GameTransitionProvider>
   );

@@ -1,27 +1,15 @@
 "use client";
 
 import Image from "next/image";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useGameTransition } from "@/components/game/gameTransition";
 
-export function CityToggleButton() {
-  const pathname = usePathname();
+export function GoToCityButton() {
   const router = useRouter();
   const { setTransition } = useGameTransition();
 
-  const isCity = pathname?.startsWith("/city");
-  const nextHref = isCity ? "/" : "/city";
-
-  const src = isCity ? "/ui/btn-court.png" : "/ui/btn-city.png";
-  const alt = isCity ? "Back to Court" : "Open City";
-
-  // Konum: örnek (px bazlı)
-  const positionClass = isCity
-    ? "fixed bottom-[150px] right-[400px]"
-    : "fixed bottom-[24px] left-1/2 -translate-x-1/2";
-
-  // Boyut: city’de büyük
-  const size = isCity ? { width: 600, height: 100 } : { width: 220, height: 72 };
+  const positionClass = "fixed bottom-[24px] left-[1400px]";
+  const size = { width: 220, height: 72 };
 
   function onClick(e: React.MouseEvent<HTMLButtonElement>) {
     e.preventDefault();
@@ -32,28 +20,27 @@ export function CityToggleButton() {
     const cy = (r.top + r.height / 2) / window.innerHeight;
 
     setTransition({
-      type: isCity ? "toCourt" : "toCity",
+      type: "toCity",
       originX: Math.round(cx * 100),
       originY: Math.round(cy * 100),
       ts: Date.now(),
     });
 
-    // Exit animasyon süresiyle uyumlu
     window.setTimeout(() => {
-      router.push(nextHref);
-    }, 220);
+      router.push("/city");
+    }, 400);
   }
 
   return (
     <button
       onClick={onClick}
       className={`${positionClass} z-50 transition-transform duration-200 hover:scale-105 active:scale-95`}
-      aria-label={alt}
+      aria-label="Open City"
       type="button"
     >
       <Image
-        src={src}
-        alt={alt}
+        src="/ui/btn-city.png"
+        alt="Open City"
         {...size}
         priority
         className="object-contain opacity-90 transition hover:opacity-100"
