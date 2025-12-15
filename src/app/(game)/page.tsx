@@ -2,8 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import type { MeDTO, RosterDTO, SlotDTO } from "@/lib/types";
-import { Court } from "@/components/game/Court";
-import { Bench } from "@/components/game/Bench";
+import { Court } from "@/components/game/scenes/Court";
+import { Bench } from "@/components/game/scenes/Bench";
 
 import {
   DndContext,

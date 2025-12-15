@@ -9,7 +9,7 @@ export function GoToCityButton() {
   const { setTransition } = useGameTransition();
 
   const positionClass = "fixed bottom-[24px] left-[1400px]";
-  const size = { width: 220, height: 72 };
+  const size = { width: 154, height: 50 };
 
   function onClick(e: React.MouseEvent<HTMLButtonElement>) {
     e.preventDefault();

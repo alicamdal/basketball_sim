@@ -1,6 +1,6 @@
 import { useDroppable, useDraggable } from "@dnd-kit/core";
 import type { SlotDTO } from "@/lib/types";
-import { SpritePlayer } from "./SpritePlayer";
+import { SpritePlayer } from "../player/SpritePlayer";
 
 const POS_LABELS = ["PG", "SG", "SF", "PF", "C"] as const;
 
@@ -42,7 +42,7 @@ function StarterDraggable({ slot, data }: { slot: number; data: SlotDTO }) {
 
   const style: React.CSSProperties = transform
     ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)` }
-    : undefined;
+    : {};
 
   return (
     <div
@@ -59,6 +59,7 @@ function StarterDraggable({ slot, data }: { slot: number; data: SlotDTO }) {
         player={data.player}
         showMeta
         posLabel={POS_LABELS[slot]}
+        size="medium"
       />
     </div>
   );

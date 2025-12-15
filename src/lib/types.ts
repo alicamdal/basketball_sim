@@ -12,6 +12,10 @@ export type PlayerDTO = {
   pos: string;
   overall: number;
   imageUrl: string;
+  salary?: string;   // BigInt as string
+  price?: string;    // BigInt as string
+  offense?: number;  // 0-100
+  defense?: number;  // 0-100
 };
 
 export type SlotDTO = {

@@ -4,10 +4,10 @@ import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import type { MeDTO } from "@/lib/types";
-import { Hud } from "@/components/game/Hud";
-import { GoToCityButton } from "@/components/game/GoToCityButton";
-import { GoToCourtButton } from "@/components/game/GoToCourtButton";
-import { ChatPanel } from "@/components/game/ChatPanel";
+import { Hud } from "@/components/game/ui/Hud";
+import { GoToCityButton } from "@/components/game/buttons/GoToCityButton";
+import { GoToCourtButton } from "@/components/game/buttons/GoToCourtButton";
+import { ChatPanel } from "@/components/game/ui/ChatPanel";
 import { GameTransitionProvider, useGameTransition } from "@/components/game/gameTransition";
 
 import { AnimatePresence, motion } from "framer-motion";
@@ -118,25 +118,28 @@ export default function GameLayout({ children }: { children: ReactNode }) {
   }, []);
 
   const isCity = pathname?.startsWith("/city");
+  const isArena = pathname?.startsWith("/arena");
 
   return (
     <GameTransitionProvider>
       <div className="relative min-h-screen w-full overflow-hidden">
-        {/* HUD her sahnede */}
-        <div className="absolute left-6 top-6 z-20">
-          <Hud me={me} />
-        </div>
+        {/* HUD - arena dışındaki sahnelerde */}
+        {!isArena && (
+          <div className="absolute left-6 top-6 z-20">
+            <Hud me={me} />
+          </div>
+        )}
 
         {/* Sahne içeriği animasyonlu */}
         <div className="relative z-10">
           <AnimatedScene>{children}</AnimatedScene>
         </div>
 
-        {/* City/Court butonları - sayfaya göre */}
-        {isCity ? <GoToCourtButton /> : <GoToCityButton />}
+        {/* City/Court butonları - arena dışında */}
+        {!isArena && (isCity ? <GoToCourtButton /> : <GoToCityButton />)}
 
-        {/* Chat paneli her sahnede */}
-        <ChatPanel />
+        {/* Chat paneli - arena dışında */}
+        {!isArena && <ChatPanel />}
       </div>
     </GameTransitionProvider>
   );

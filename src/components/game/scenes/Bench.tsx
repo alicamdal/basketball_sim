@@ -1,7 +1,7 @@
 import { useDroppable, useDraggable } from "@dnd-kit/core";
 import type { SlotDTO } from "@/lib/types";
-import { PlayerTile } from "./PlayerTile";
-import { SpritePlayer } from "./SpritePlayer";
+import { PlayerTile } from "../player/PlayerTile";
+import { SpritePlayer } from "../player/SpritePlayer";
 
 function BenchCell({ slot, data }: { slot: number; data: SlotDTO }) {
   const droppableId = `bench-${slot}`;

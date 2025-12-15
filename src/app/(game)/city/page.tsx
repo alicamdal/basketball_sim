@@ -1,4 +1,4 @@
-import { ArenaButton } from "@/components/game/ArenaButton";
+import { ArenaButton } from "@/components/game/buttons/ArenaButton";
 
 export default function CityPage() {
   return (

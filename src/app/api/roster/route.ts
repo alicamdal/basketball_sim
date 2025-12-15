@@ -23,6 +23,10 @@ export async function GET() {
         pos: x.player.pos,
         overall: x.player.overall,
         imageUrl: x.player.imageKey,
+        salary: x.player.salary.toString(),
+        price: x.player.price.toString(),
+        offense: x.player.offense,
+        defense: x.player.defense,
       },
     }));
 
@@ -38,6 +42,10 @@ export async function GET() {
         pos: x.player.pos,
         overall: x.player.overall,
         imageUrl: x.player.imageKey,
+        salary: x.player.salary.toString(),
+        price: x.player.price.toString(),
+        offense: x.player.offense,
+        defense: x.player.defense,
       },
     }));
 

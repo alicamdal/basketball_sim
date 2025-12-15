@@ -1,15 +1,15 @@
 "use client";
 
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 export function ArenaButton() {
-  // Şimdilik placeholder pozisyon - sen değiştireceksin
-  const positionClass = "fixed bottom-[400px] right-[30px]";
-  const size = { width: 600, height: 100 };
+  const router = useRouter();
+  const positionClass = "fixed bottom-[500px] right-[100px]";
+  const size = { width: 420, height: 70 };
 
   function onClick() {
-    // Şimdilik boş - ileride işlev eklenecek
-    console.log("Arena button clicked");
+    router.push("/arena");
   }
 
   return (

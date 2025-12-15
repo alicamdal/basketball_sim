@@ -25,6 +25,12 @@ model Player {
   overall  Int
   imageKey String
 
+  // New fields for player card
+  salary   BigInt @default(0)      // Player salary
+  price    BigInt @default(0)       // Market price
+  offense  Int    @default(50)      // Offensive rating (0-100)
+  defense  Int    @default(50)      // Defensive rating (0-100)
+
   rosterItems RosterItem[]
 
   createdAt DateTime @default(now())

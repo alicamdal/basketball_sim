@@ -8,8 +8,8 @@ export function GoToCourtButton() {
   const router = useRouter();
   const { setTransition } = useGameTransition();
 
-  const positionClass = "fixed bottom-[150px] right-[400px]";
-  const size = { width: 600, height: 100 };
+  const positionClass = "fixed bottom-[180px] right-[450px]";
+  const size = { width: 420, height: 70 };
 
   function onClick(e: React.MouseEvent<HTMLButtonElement>) {
     e.preventDefault();
