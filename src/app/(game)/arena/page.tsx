@@ -69,6 +69,31 @@ export default function ArenaPage() {
     swapLocal(from.slot, to.slot);
   }
 
+  // click-to-swap state
+  const [clickSwap, setClickSwap] = useState<null | { location: "STARTER"; slot: number }>(null);
+
+  async function handleClickSwap(target: { location: "STARTER"; slot: number }) {
+    if (!roster) return;
+    if (!clickSwap) {
+      setClickSwap(target);
+    } else if (clickSwap.slot !== target.slot) {
+      const prev = roster;
+      swapLocal(clickSwap.slot, target.slot);
+      setClickSwap(null);
+      try {
+        await fetch("/api/roster/swap", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ from: clickSwap, to: target }),
+        });
+      } catch (err) {
+        setRoster(prev);
+      }
+    } else {
+      setClickSwap(null);
+    }
+  }
+
   function handleClose() {
     router.push("/city");
   }
@@ -104,7 +129,7 @@ export default function ArenaPage() {
         </button>
 
         {/* Players on court - left side */}
-        {starterSlots.length > 0 && <ArenaPlayers starters={starterSlots} />}
+        {starterSlots.length > 0 && <ArenaPlayers starters={starterSlots} onSwap={handleClickSwap} selected={clickSwap} />}
 
         {/* Opponent players - right side */}
         <OpponentPlayers starters={opponentStarters} />

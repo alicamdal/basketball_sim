@@ -101,6 +101,27 @@ export default function GamePage() {
     }
   }
 
+  // click-to-swap state
+  const [clickSwap, setClickSwap] = useState<null | DragId>(null);
+
+  async function handleClickSwap(target: DragId) {
+    if (!roster) return;
+    if (!clickSwap) {
+      setClickSwap(target);
+    } else if (clickSwap.location !== target.location || clickSwap.slot !== target.slot) {
+      const prev = roster;
+      swapLocal(clickSwap, target);
+      setClickSwap(null);
+      try {
+        await postJSON("/api/roster/swap", { from: clickSwap, to: target });
+      } catch (err) {
+        setRoster(prev);
+      }
+    } else {
+      setClickSwap(null);
+    }
+  }
+
   return (
     <div className="relative min-h-screen overflow-hidden">
       {/* background court image */}
@@ -119,12 +140,12 @@ export default function GamePage() {
         <div className="relative z-10 mx-auto grid max-w-7xl grid-cols-12 gap-6 p-6 pt-64 pl-32">
           {/* court center */}
           <div className="col-span-9">
-            <Court starters={starterSlots} />
+            <Court starters={starterSlots} onSwap={handleClickSwap} selected={clickSwap} />
           </div>
 
           {/* bench right */}
           <div className="col-span-3 -mt-15">
-            <Bench bench={benchSlots} />
+            <Bench bench={benchSlots} onSwap={handleClickSwap} selected={clickSwap} />
           </div>
         </div>
       </DndContext>

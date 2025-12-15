@@ -98,9 +98,9 @@ export function SpritePlayer({
         />
       </div>
       {/* Enerji barı */}
-      <div className={`w-full max-w-[180px] md:max-w-[220px] h-2 bg-gray-300 rounded-full mt-2 mb-1 overflow-hidden`}>
+      <div className={`w-full max-w-[180px] md:max-w-[220px] h-2 bg-gray-300 rounded-full mt-2 mb-1 overflow-hidden relative`}>
         <div
-          className={`h-full ${getEnergyBarColor(player.energy ?? 100)}`}
+          className={`h-full absolute left-0 top-0 ${getEnergyBarColor(player.energy ?? 100)}`}
           style={{ width: `${player.energy ?? 100}%` }}
         />
       </div>
