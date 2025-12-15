@@ -9,6 +9,9 @@ import { GoToCityButton } from "@/components/game/buttons/GoToCityButton";
 import { GoToCourtButton } from "@/components/game/buttons/GoToCourtButton";
 import { ChatPanel } from "@/components/game/ui/ChatPanel";
 import { GameTransitionProvider, useGameTransition } from "@/components/game/gameTransition";
+import { NavBar } from "@/components/game/ui/NavBar";
+import { FixtureModal } from "@/components/game/ui/FixtureModal";
+import { SalaryPanels } from "@/components/game/ui/SalaryPanels";
 
 import { AnimatePresence, motion } from "framer-motion";
 
@@ -112,6 +115,7 @@ function AnimatedScene({ children }: { children: ReactNode }) {
 export default function GameLayout({ children }: { children: ReactNode }) {
   const [me, setMe] = useState<MeDTO | null>(null);
   const pathname = usePathname();
+  const [showFixture, setShowFixture] = useState(false);
 
   useEffect(() => {
     getJSON<MeDTO>("/api/me").then(setMe).catch(console.error);
@@ -119,15 +123,21 @@ export default function GameLayout({ children }: { children: ReactNode }) {
 
   const isCity = pathname?.startsWith("/city");
   const isArena = pathname?.startsWith("/arena");
+  const isCourt = pathname === "/";
 
   return (
     <GameTransitionProvider>
       <div className="relative min-h-screen w-full overflow-hidden">
+        <FixtureModal open={showFixture} onClose={() => setShowFixture(false)} />
         {/* HUD - arena dışındaki sahnelerde */}
         {!isArena && (
-          <div className="absolute left-6 top-6 z-20">
-            <Hud me={me} />
-          </div>
+          <>
+            <div className="absolute left-6 top-6 z-20">
+              <Hud me={me} />
+            </div>
+            {/* Salary panels sağ üstte */}
+            <SalaryPanels />
+          </>
         )}
 
         {/* Sahne içeriği animasyonlu */}
@@ -140,6 +150,9 @@ export default function GameLayout({ children }: { children: ReactNode }) {
 
         {/* Chat paneli - arena dışında */}
         {!isArena && <ChatPanel />}
+
+        {/* Alt ortada NavBar sadece city ve court'ta */}
+        {(isCity || isCourt) && <NavBar onFirstButtonClick={() => setShowFixture(true)} />}
       </div>
     </GameTransitionProvider>
   );

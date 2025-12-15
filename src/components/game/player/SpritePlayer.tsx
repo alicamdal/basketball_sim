@@ -47,6 +47,21 @@ export function SpritePlayer({
     actualSize === "medium" ? "text-[11px]" :
     "text-[11px]";
 
+  // Utility to get color class for overall
+  function getOverallColor(overall: number) {
+    if (overall >= 90) return "text-purple-400"; // mor
+    if (overall >= 80) return "text-blue-400";   // mavi
+    if (overall >= 70) return "text-green-400";  // yeşil
+    return "text-gray-400";                      // gri
+  }
+
+  // Utility to get color class for energy bar
+  function getEnergyBarColor(energy: number) {
+    if (energy >= 70) return "bg-green-400";
+    if (energy >= 30) return "bg-yellow-400";
+    return "bg-red-500";
+  }
+
   function handleMouseEnter(e: React.MouseEvent<HTMLDivElement>) {
     const rect = e.currentTarget.getBoundingClientRect();
     setCardPosition({
@@ -82,19 +97,31 @@ export function SpritePlayer({
           ].join(" ")}
         />
       </div>
+      {/* Enerji barı */}
+      <div className={`w-full max-w-[180px] md:max-w-[220px] h-2 bg-gray-300 rounded-full mt-2 mb-1 overflow-hidden`}>
+        <div
+          className={`h-full ${getEnergyBarColor(player.energy ?? 100)}`}
+          style={{ width: `${player.energy ?? 100}%` }}
+        />
+      </div>
 
         {/* label pill */}
         {showMeta ? (
-          <div className={`flex items-center rounded-full bg-black/60 text-white backdrop-blur ${actualSize === 'small' ? 'mt-0.5 gap-0.5 px-1.5 py-0.5' : 'mt-1 gap-1.5 px-2.5 py-0.5'}`}>
+          <div
+            className={`flex items-center rounded-full bg-black/60 text-white backdrop-blur whitespace-nowrap ${actualSize === 'small' ? 'mt-0.5 gap-1 px-2 py-0.5' : 'mt-1 gap-2 px-3 py-1'}`}
+            style={{ minHeight: actualSize === 'small' ? 28 : 32 }}
+          >
             {posLabel ? (
-              <span className={`rounded-full bg-white/15 font-semibold ${posSize} ${actualSize === 'small' ? 'px-1 py-[1px]' : 'px-1.5 py-[1px]'}`}>
+              <span className={`rounded-full bg-white/15 font-semibold ${posSize} ${actualSize === 'small' ? 'px-1 py-[1px]' : 'px-1.5 py-[1px]'} ${getOverallColor(player.overall)}`}>
                 {posLabel}
               </span>
             ) : null}
-
-            <span className={`${nameSize} font-semibold leading-none`}>{player.name}</span>
-
-            <span className={`${ovrSize} opacity-80`}>OVR {player.overall}</span>
+            <span className={`flex items-center gap-1 ${nameSize} font-semibold leading-none`}>
+              <span className={getOverallColor(player.overall)}>{player.name}</span>
+              <span className={`ml-2 ${ovrSize} opacity-80`}>
+                <span className={getOverallColor(player.overall)}>OVR</span> <span className={getOverallColor(player.overall)}>{player.overall}</span>
+              </span>
+            </span>
           </div>
         ) : null}
       </div>

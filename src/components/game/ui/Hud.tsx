@@ -14,32 +14,31 @@ export function Hud({ me }: { me: MeDTO | null }) {
   const pct = Math.max(0, Math.min(100, (xp / xpToNext) * 100));
 
   // ---- LIVE CLOCK (Europe/Istanbul) ----
-const [mounted, setMounted] = useState(false);
-const [now, setNow] = useState<Date | null>(null);
+  const [mounted, setMounted] = useState(false);
+  const [now, setNow] = useState<Date | null>(null);
 
-useEffect(() => {
-  setMounted(true);
-  setNow(new Date());
-  const id = window.setInterval(() => setNow(new Date()), 1000);
-  return () => window.clearInterval(id);
-}, []);
+  useEffect(() => {
+    setMounted(true);
+    setNow(new Date());
+    const id = window.setInterval(() => setNow(new Date()), 1000);
+    return () => window.clearInterval(id);
+  }, []);
 
-const formatter = useMemo(() => {
-  return new Intl.DateTimeFormat("tr-TR", {
-    timeZone: "Europe/Istanbul",
-    weekday: "short",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  });
-}, []);
+  const formatter = useMemo(() => {
+    return new Intl.DateTimeFormat("tr-TR", {
+      timeZone: "Europe/Istanbul",
+      weekday: "short",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    });
+  }, []);
 
-// SSR sırasında boş string bas → hydration mismatch olmaz
-const formattedNow = mounted && now ? formatter.format(now) : "";
-
+  // SSR sırasında boş string bas → hydration mismatch olmaz
+  const formattedNow = mounted && now ? formatter.format(now) : "";
 
   return (
     <div className="inline-flex items-center gap-3 rounded-xl border border-white/20 bg-black/50 px-4 py-3 text-white shadow-lg backdrop-blur-md text-base">
@@ -90,6 +89,9 @@ const formattedNow = mounted && now ? formatter.format(now) : "";
             <span className="tabular-nums">{formattedNow}</span>
           </div>
         </div>
+
+        {/* Row 4: Salary Info */}
+        {/* Salary info removed from HUD, will be shown in separate panels */}
       </div>
     </div>
   );

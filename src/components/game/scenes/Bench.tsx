@@ -1,6 +1,5 @@
 import { useDroppable, useDraggable } from "@dnd-kit/core";
 import type { SlotDTO } from "@/lib/types";
-import { PlayerTile } from "../player/PlayerTile";
 import { SpritePlayer } from "../player/SpritePlayer";
 
 function BenchCell({ slot, data }: { slot: number; data: SlotDTO }) {
@@ -23,21 +22,21 @@ function BenchCell({ slot, data }: { slot: number; data: SlotDTO }) {
       <div
         ref={setDragRef}
         style={style}
-        className={isDragging ? "opacity-60" : "opacity-100"}
+        className={`cursor-pointer ${isDragging ? "opacity-60" : "opacity-100"}`}
         {...listeners}
         {...attributes}
       >
-        <PlayerTile player={data.player} showMeta={false} />
+        <SpritePlayer player={data.player} showMeta={false} size="small" />
       </div>
     </div>
   );
 }
 
 export function Bench({ bench }: { bench: SlotDTO[] }) {
-  const sorted = [...bench].sort((a, b) => a.slot - b.slot);
+  const sorted = [...bench].sort((a, b) => a.slot - b.slot).slice(0, 5);
 
   return (
-    <div className="rounded-3xl border border-white/15 bg-black/35 p-4 text-white shadow">
+    <div className="rounded-3xl border border-white/15 bg-black/35 p-4 text-white shadow mt-[-30px] ml-6">
       <div className="mb-3 text-sm font-semibold">Yedekler</div>
       <div className="grid grid-cols-2 gap-3">
         {sorted.map((b) => (

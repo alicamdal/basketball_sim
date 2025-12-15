@@ -18,6 +18,14 @@ export function PlayerCard({ player, position }: PlayerCardProps) {
 
   if (!mounted) return null;
 
+  // Utility to get color class for overall
+  function getOverallColor(overall: number) {
+    if (overall >= 90) return "text-purple-400"; // mor
+    if (overall >= 80) return "text-blue-400";   // mavi
+    if (overall >= 70) return "text-green-400";  // yeşil
+    return "text-gray-400";                      // gri
+  }
+
   const card = (
     <div
       className="fixed z-[100] pointer-events-none"
@@ -30,13 +38,13 @@ export function PlayerCard({ player, position }: PlayerCardProps) {
       <div className="rounded-xl border-2 border-white/30 bg-black/70 px-4 py-3 text-white shadow-2xl backdrop-blur-md min-w-[240px]">
         {/* Header */}
         <div className="mb-2 flex items-center justify-between">
-          <div className="text-sm font-bold">{player.name}</div>
+          <div className={"text-sm font-bold " + getOverallColor(player.overall)}>{player.name}</div>
           <div className="flex items-center gap-2">
-            <span className="rounded bg-white/20 px-2 py-0.5 text-[10px] font-semibold">
+            <span className={"rounded bg-white/20 px-2 py-0.5 text-[10px] font-semibold " + getOverallColor(player.overall)}>
               {player.pos}
             </span>
             <span className="text-[10px] font-semibold text-white/80">
-              OVR {player.overall}
+              OVR <span className={getOverallColor(player.overall)}>{player.overall}</span>
             </span>
           </div>
         </div>
@@ -62,7 +70,7 @@ export function PlayerCard({ player, position }: PlayerCardProps) {
           {/* Rating (Overall) */}
           <div className="flex justify-between">
             <span className="text-white/60">Rating:</span>
-            <span className="font-semibold">{player.overall}</span>
+            <span className={"font-semibold " + getOverallColor(player.overall)}>{player.overall}</span>
           </div>
 
           {/* Offense */}

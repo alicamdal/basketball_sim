@@ -73,9 +73,9 @@ export function ChatPanel() {
           <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
           </svg>
-          <span className="text-xs font-semibold">Chat</span>
+          <span className="text-sm font-semibold">Chat</span>
           {messages.length > 0 && (
-            <span className="rounded bg-white/20 px-1.5 py-0.5 text-[9px] font-semibold">
+            <span className="rounded bg-white/20 px-2 py-1 text-[12px] font-semibold">
               {messages.length}
             </span>
           )}
@@ -85,12 +85,12 @@ export function ChatPanel() {
   }
 
   return (
-    <div className="fixed bottom-6 left-6 z-50 flex h-[280px] w-[520px] flex-col rounded-xl border border-white/20 bg-black/50 shadow-lg backdrop-blur-md">
+    <div className="fixed bottom-6 left-6 z-50 flex h-[280px] w-[520px] flex-col rounded-xl border border-white/20 bg-black/50 shadow-lg backdrop-blur-md text-base">
       {/* Header */}
       <div className="flex items-center justify-between border-b border-white/10 px-3 py-2">
         <div className="flex items-center gap-2">
           <div className="h-1.5 w-1.5 rounded-full bg-green-400 animate-pulse" />
-          <h3 className="text-xs font-semibold text-white">Game Chat</h3>
+          <h3 className="text-sm font-semibold text-white">Game Chat</h3>
         </div>
         <button
           onClick={() => setIsMinimized(true)}
@@ -107,19 +107,19 @@ export function ChatPanel() {
       <div className="flex-1 overflow-y-auto p-2.5 space-y-1">
         {messages.length === 0 ? (
           <div className="flex h-full items-center justify-center text-center">
-            <p className="text-xs text-white/40">No messages yet 💬</p>
+            <p className="text-sm text-white/40">No messages yet 💬</p>
           </div>
         ) : (
           messages.map((msg) => (
             <div key={msg.id} className="animate-[slideIn_0.2s_ease-out]">
               <div className="flex items-baseline gap-2">
-                <span className="text-[10px] font-semibold text-white/70 flex-shrink-0">
+                <span className="text-[12px] font-semibold text-white/70 flex-shrink-0">
                   {msg.username}:
                 </span>
-                <span className="text-[10px] text-white/90 break-words">
+                <span className="text-[12px] text-white/90 break-words">
                   {msg.message}
                 </span>
-                <span className="text-[9px] text-white/30 flex-shrink-0 ml-auto">
+                <span className="text-[11px] text-white/30 flex-shrink-0 ml-auto">
                   {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </span>
               </div>
@@ -138,7 +138,7 @@ export function ChatPanel() {
             onChange={(e) => setInputValue(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="Type a message..."
-            className="flex-1 rounded-lg bg-white/10 px-2.5 py-1.5 text-[10px] text-white placeholder-white/40 outline-none border border-white/10 transition-all focus:border-white/30 focus:bg-white/15"
+            className="flex-1 rounded-lg bg-white/10 px-2.5 py-1.5 text-[13px] text-white placeholder-white/40 outline-none border border-white/10 transition-all focus:border-white/30 focus:bg-white/15"
             maxLength={200}
           />
           <button
