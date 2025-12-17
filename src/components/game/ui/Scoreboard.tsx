@@ -45,17 +45,23 @@ async function getJSON<T>(url: string): Promise<T> {
 type ScoreboardProps = {
   homeStarters?: SlotDTO[];
   awayStarters?: SlotDTO[];
+  liveScore?: {
+    homeScore: number;
+    awayScore: number;
+    quarter: number;
+    timeRemaining: string;
+  };
 };
 
-export function Scoreboard({ homeStarters = [], awayStarters = [] }: ScoreboardProps) {
+export function Scoreboard({ homeStarters = [], awayStarters = [], liveScore }: ScoreboardProps) {
   const [data, setData] = useState<ScoreboardData>({
     homeTeam: "Loading...",
     awayTeam: "Warriors",
-    homeScore: 24,
-    awayScore: 28,
+    homeScore: 0,
+    awayScore: 0,
     quarter: 1,
-    minutes: 8,
-    seconds: 45,
+    minutes: 12,
+    seconds: 0,
   });
 
   // Fetch user data
@@ -70,33 +76,22 @@ export function Scoreboard({ homeStarters = [], awayStarters = [] }: ScoreboardP
       .catch(console.error);
   }, []);
 
-  // Demo: Update timer every second
+  // Live score'dan gelen verileri kullan
   useEffect(() => {
-    const interval = setInterval(() => {
-      setData((prev) => {
-        let newSeconds = prev.seconds - 1;
-        let newMinutes = prev.minutes;
+    if (liveScore) {
+      // timeRemaining formatı: "11:45" veya "12:00"
+      const [mins, secs] = liveScore.timeRemaining.split(':').map(Number);
 
-        if (newSeconds < 0) {
-          newSeconds = 59;
-          newMinutes = prev.minutes - 1;
-        }
-
-        if (newMinutes < 0) {
-          newMinutes = 11;
-          newSeconds = 59;
-        }
-
-        return {
-          ...prev,
-          minutes: newMinutes,
-          seconds: newSeconds,
-        };
-      });
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, []);
+      setData((prev) => ({
+        ...prev,
+        homeScore: liveScore.homeScore,
+        awayScore: liveScore.awayScore,
+        quarter: liveScore.quarter,
+        minutes: mins || 0,
+        seconds: secs || 0,
+      }));
+    }
+  }, [liveScore]);
 
   const homeStats = calculateTeamStats(homeStarters);
   const awayStats = calculateTeamStats(awayStarters);

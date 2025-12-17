@@ -12,7 +12,7 @@ export default function CityPage() {
       {/* Dark / soft overlay */}
       <div className="absolute inset-0 bg-black/35 backdrop-blur-[1px]" />
 
-      {/* Action button */}
+      {/* Action buttons */}
       <ArenaButton />
     </div>
   );

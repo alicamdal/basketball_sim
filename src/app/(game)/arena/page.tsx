@@ -7,11 +7,25 @@ import { MatchSimulation } from "@/components/game/ui/MatchSimulation";
 import { Scoreboard } from "@/components/game/ui/Scoreboard";
 import { ArenaPlayers } from "@/components/game/scenes/ArenaPlayers";
 import { OpponentPlayers } from "@/components/game/scenes/OpponentPlayers";
-import type { RosterDTO } from "@/lib/types";
+import type { RosterDTO, SlotDTO } from "@/lib/types";
 import { DndContext, DragEndEvent, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { generateDummyOpponent } from "@/lib/dummyOpponent";
+import { websocketManager } from "@/lib/websocket";
 
 type DragId = { slot: number };
+
+type GameEvent = {
+  type: string;
+  data: any;
+  timestamp: string;
+};
+
+type GameState = {
+  homeScore: number;
+  awayScore: number;
+  quarter: number;
+  timeRemaining: string;
+};
 
 function idToDrag(id: string): DragId {
   const slotStr = id.split("-")[1];
@@ -24,16 +38,88 @@ async function getJSON<T>(url: string): Promise<T> {
   return res.json();
 }
 
+// Roster oyuncularını WebSocket formatına çevir
+function convertToWebSocketFormat(starters: SlotDTO[], teamName: string) {
+  return {
+    name: teamName,
+    players: starters.map((slot) => ({
+      id: parseInt(slot.player.id),
+      name: slot.player.name,
+      attack: slot.player.offense || 70,
+      defense: slot.player.defense || 70,
+      max_energy: 100,
+    })),
+  };
+}
+
 export default function ArenaPage() {
   const router = useRouter();
   const [roster, setRoster] = useState<RosterDTO | null>(null);
   const [opponentStarters] = useState(() => generateDummyOpponent());
+  const [events, setEvents] = useState<GameEvent[]>([]);
+  const [isConnected, setIsConnected] = useState(false);
+  const [gameState, setGameState] = useState<GameState>({
+    homeScore: 0,
+    awayScore: 0,
+    quarter: 1,
+    timeRemaining: "12:00",
+  });
 
   useEffect(() => {
     getJSON<RosterDTO>("/api/roster")
       .then(setRoster)
       .catch(console.error);
   }, []);
+
+  // WebSocket bağlantısı ve maç başlatma
+  useEffect(() => {
+    if (!roster || roster.starters.length === 0) return;
+
+    console.log('Arena mounted - starting match');
+
+    // WebSocket bağlantısını kur
+    websocketManager.connect();
+
+    // Event listener'ları ekle
+    const unsubscribeEvent = websocketManager.onEvent((event) => {
+      setEvents((prev) => [...prev, event]);
+
+      // Game state'i güncelle
+      if (event.type === 'game_state' || event.type === 'quarter_start' || event.type === 'score') {
+        setGameState({
+          homeScore: event.data.team1_score || 0,
+          awayScore: event.data.team2_score || 0,
+          quarter: event.data.quarter || 1,
+          timeRemaining: event.data.time_remaining_formatted || "12:00",
+        });
+      }
+    });
+
+    const unsubscribeConnection = websocketManager.onConnectionChange((connected) => {
+      setIsConnected(connected);
+    });
+
+    // Maç verilerini gönder
+    if (roster.starters.length > 0) {
+      const team1 = convertToWebSocketFormat(roster.starters, "Home Team");
+      const team2 = convertToWebSocketFormat(opponentStarters, "Away Team");
+
+      const gameData = {
+        team1,
+        team2,
+      };
+
+      console.log('Sending match data to WebSocket:', gameData);
+      websocketManager.connect(gameData);
+    }
+
+    // Cleanup - listener'ları kaldır
+    return () => {
+      console.log('Arena unmounting');
+      unsubscribeEvent();
+      unsubscribeConnection();
+    };
+  }, [roster, opponentStarters]);
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
 
@@ -95,6 +181,9 @@ export default function ArenaPage() {
   }
 
   function handleClose() {
+    // Bağlantıyı kapat ve city'ye dön
+    websocketManager.disconnect();
+    setEvents([]);
     router.push("/city");
   }
 
@@ -114,7 +203,11 @@ export default function ArenaPage() {
         <div className="absolute inset-0 bg-black/40 backdrop-blur-[1px]" />
 
         {/* Scoreboard - top center */}
-        <Scoreboard homeStarters={starterSlots} awayStarters={opponentStarters} />
+        <Scoreboard
+          homeStarters={starterSlots}
+          awayStarters={opponentStarters}
+          liveScore={gameState}
+        />
 
         {/* Close button - top right */}
         <button
@@ -138,7 +231,7 @@ export default function ArenaPage() {
         <ChatPanel />
 
         {/* Match simulation - right side */}
-        <MatchSimulation />
+        <MatchSimulation events={events} isConnected={isConnected} />
       </div>
     </DndContext>
   );
