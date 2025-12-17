@@ -9,9 +9,28 @@ type ArenaPlayersProps = {
   starters: SlotDTO[];
   onSwap?: (target: { location: "STARTER"; slot: number }) => void;
   selected?: { location: string; slot: number } | null;
+  scoreAnim?: { playerId: string; key: number; points: number; assistPlayerId?: string; assistKey?: number } | null;
+  blockAnim?: { playerId: string; key: number } | null;
+  foulAnim?: { playerId: string; key: number } | null;
 };
 
-function ArenaPlayerSlot({ slot, data, selected, onSelect }: { slot: number; data?: SlotDTO; selected: boolean; onSelect: (slot: number) => void }) {
+function ArenaPlayerSlot({
+  slot,
+  data,
+  selected,
+  onSelect,
+  scoreAnim,
+  blockAnim,
+  foulAnim,
+}: {
+  slot: number;
+  data?: SlotDTO;
+  selected: boolean;
+  onSelect: (slot: number) => void;
+  scoreAnim?: { playerId: string; key: number; points: number; assistPlayerId?: string; assistKey?: number } | null;
+  blockAnim?: { playerId: string; key: number } | null;
+  foulAnim?: { playerId: string; key: number } | null;
+}) {
   // Sol tarafta oyuncuların pozisyonları (screenshot'a göre ayarlandı)
   const positions = [
     { left: "42%", bottom: "50%" },   // PG - sol alt köşe yakını
@@ -35,7 +54,6 @@ function ArenaPlayerSlot({ slot, data, selected, onSelect }: { slot: number; dat
       <div
         className={["rounded", selected ? "ring-2 ring-emerald-400" : "bg-transparent"].join(" ")}
         onClick={() => onSelect(slot)}
-        style={{ cursor: data ? "pointer" : "default" }}
       >
         {data ? (
           <SpritePlayer
@@ -43,6 +61,11 @@ function ArenaPlayerSlot({ slot, data, selected, onSelect }: { slot: number; dat
             showMeta={true}
             posLabel={POS_LABELS[slot]}
             compact={true}
+            scoreAnimKey={scoreAnim?.playerId === data.player.id ? scoreAnim.key : undefined}
+            scoreAnimPoints={scoreAnim?.playerId === data.player.id ? scoreAnim.points : undefined}
+            assistAnimKey={scoreAnim?.assistPlayerId === data.player.id ? scoreAnim.assistKey : undefined}
+            blockAnimKey={blockAnim?.playerId === data.player.id ? blockAnim.key : undefined}
+            foulAnimKey={foulAnim?.playerId === data.player.id ? foulAnim.key : undefined}
           />
         ) : null}
       </div>
@@ -50,7 +73,7 @@ function ArenaPlayerSlot({ slot, data, selected, onSelect }: { slot: number; dat
   );
 }
 
-export function ArenaPlayers({ starters, onSwap, selected }: ArenaPlayersProps) {
+export function ArenaPlayers({ starters, onSwap, selected, scoreAnim, blockAnim, foulAnim }: ArenaPlayersProps) {
   const map = new Map(starters.map((s) => [s.slot, s]));
 
   const handleSelect = (slot: number) => {
@@ -66,6 +89,9 @@ export function ArenaPlayers({ starters, onSwap, selected }: ArenaPlayersProps) 
           data={map.get(slot)}
           selected={selected?.location === "STARTER" && selected?.slot === slot}
           onSelect={handleSelect}
+          scoreAnim={scoreAnim}
+          blockAnim={blockAnim}
+          foulAnim={foulAnim}
         />
       ))}
     </div>

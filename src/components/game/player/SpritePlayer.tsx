@@ -9,12 +9,22 @@ export function SpritePlayer({
   posLabel,
   compact,
   size = "normal",
+  scoreAnimKey,
+  scoreAnimPoints,
+  assistAnimKey,
+  blockAnimKey,
+  foulAnimKey,
 }: {
   player: PlayerDTO;
   showMeta: boolean;
   posLabel?: string;      // PG/SG/SF/PF/C
   compact?: boolean;      // bench için daha küçük (deprecated, size kullan)
   size?: "small" | "medium" | "normal"; // small=arena/bench, medium=court, normal=büyük
+  scoreAnimKey?: number;
+  scoreAnimPoints?: number;
+  assistAnimKey?: number;
+  blockAnimKey?: number;
+  foulAnimKey?: number;
 }) {
   const [showCard, setShowCard] = useState(false);
   const [cardPosition, setCardPosition] = useState({ x: 0, y: 0 });
@@ -82,28 +92,103 @@ export function SpritePlayer({
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
-      {/* sprite */}
-      <div className={`relative ${spriteSize}`}>
-        <Image
-          src={player.imageUrl}
-          alt={player.name}
-          fill
-          priority={false}
-          className={[
-            "object-contain",
-            "drop-shadow-[0_10px_18px_rgba(0,0,0,0.55)]", // sahaya oturtur
-            scaleClass,
-            "origin-bottom",
-          ].join(" ")}
-        />
-      </div>
-      {/* Enerji barı */}
-      <div className={`w-full max-w-[180px] md:max-w-[220px] h-2 bg-gray-300 rounded-full mt-2 mb-1 overflow-hidden relative`}>
-        <div
-          className={`h-full absolute left-0 top-0 ${getEnergyBarColor(player.energy ?? 100)}`}
-          style={{ width: `${player.energy ?? 100}%` }}
-        />
-      </div>
+        {scoreAnimKey ? (
+          <div
+            key={scoreAnimKey}
+            className="pointer-events-none absolute left-1/2 top-0 z-50"
+            style={{ animation: "scoreFloatUp 1.6s ease-out forwards" }}
+          >
+            <Image
+              src={
+                scoreAnimPoints === 3
+                  ? "/ui/pts3.png"
+                  : scoreAnimPoints === 2
+                    ? "/ui/pts2.png"
+                    : "/ui/pts.png"
+              }
+              alt="Score"
+              width={512}
+              height={512}
+              className="opacity-95"
+              priority={false}
+            />
+          </div>
+        ) : null}
+
+        {assistAnimKey ? (
+          <div
+            key={assistAnimKey}
+            className="pointer-events-none absolute left-1/2 top-0 z-50"
+            style={{ animation: "scoreFloatUp 1.6s ease-out forwards" }}
+          >
+            <Image
+              src="/ui/ast.png"
+              alt="Assist"
+              width={512}
+              height={512}
+              className="opacity-95"
+              priority={false}
+            />
+          </div>
+        ) : null}
+
+        {blockAnimKey ? (
+          <div
+            key={blockAnimKey}
+            className="pointer-events-none absolute left-1/2 top-0 z-50"
+            style={{ animation: "scoreFloatUp 1.6s ease-out forwards" }}
+          >
+            <Image
+              src="/ui/blk.png"
+              alt="Block"
+              width={512}
+              height={512}
+              className="opacity-95"
+              priority={false}
+            />
+          </div>
+        ) : null}
+
+        {foulAnimKey ? (
+          <div
+            key={foulAnimKey}
+            className="pointer-events-none absolute left-1/2 top-0 z-50"
+            style={{ animation: "scoreFloatUp 1.6s ease-out forwards" }}
+          >
+            <Image
+              src="/ui/faul.png"
+              alt="Foul"
+              width={512}
+              height={512}
+              className="opacity-95"
+              priority={false}
+            />
+          </div>
+        ) : null}
+
+        {/* sprite */}
+        <div className={`relative ${spriteSize}`}>
+          <Image
+            src={player.imageUrl}
+            alt={player.name}
+            fill
+            priority={false}
+            className={[
+              "object-contain",
+              "drop-shadow-[0_10px_18px_rgba(0,0,0,0.55)]", // sahaya oturtur
+              scaleClass,
+              "origin-bottom",
+            ].join(" ")}
+          />
+        </div>
+
+        {/* Enerji barı */}
+        <div className={`w-full max-w-[180px] md:max-w-[220px] h-2 bg-gray-300 rounded-full mt-2 mb-1 overflow-hidden relative`}>
+          <div
+            className={`h-full absolute left-0 top-0 ${getEnergyBarColor(player.energy ?? 100)}`}
+            style={{ width: `${player.energy ?? 100}%` }}
+          />
+        </div>
 
         {/* label pill */}
         {showMeta ? (

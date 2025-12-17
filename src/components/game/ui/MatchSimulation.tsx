@@ -117,7 +117,7 @@ export function MatchSimulation({ events = [], isConnected = false }: Props) {
                 className="animate-[slideIn_0.2s_ease-out] rounded-lg bg-white/5 px-2.5 py-1.5 transition-all hover:bg-white/10"
               >
                 <div className="flex items-start gap-2">
-                  <span className="text-[10px] text-white/90 flex-1">
+                  <span className="text-[15px] text-white/90 flex-1">
                     {event.text}
                   </span>
                   <span className="text-[9px] text-white/30 flex-shrink-0">

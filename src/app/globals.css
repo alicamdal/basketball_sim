@@ -39,3 +39,18 @@ button {
     transform: translateX(0);
   }
 }
+
+@keyframes scoreFloatUp {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 0) scale(0.9);
+  }
+  25% {
+    opacity: 1;
+    transform: translate(-50%, -10px) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -72px) scale(1.05);
+  }
+}

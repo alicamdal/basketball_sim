@@ -1,4 +1,4 @@
-type GameEvent = {
+export type GameEvent = {
   type: string;
   data: any;
   timestamp: string;

@@ -16,7 +16,7 @@ type DragId = { slot: number };
 
 type GameEvent = {
   type: string;
-  data: any;
+  data: Record<string, unknown>;
   timestamp: string;
 };
 
@@ -58,6 +58,27 @@ export default function ArenaPage() {
   const [opponentStarters] = useState(() => generateDummyOpponent());
   const [events, setEvents] = useState<GameEvent[]>([]);
   const [isConnected, setIsConnected] = useState(false);
+  const [scoreAnim, setScoreAnim] = useState<null | {
+    side: "home" | "away";
+    playerId: string;
+    key: number;
+    points: number;
+    assistPlayerId?: string;
+    assistKey?: number;
+  }>(null);
+
+  const [blockAnim, setBlockAnim] = useState<null | {
+    side: "home" | "away";
+    playerId: string;
+    key: number;
+  }>(null);
+
+  const [foulAnim, setFoulAnim] = useState<null | {
+    side: "home" | "away";
+    playerId: string;
+    key: number;
+  }>(null);
+
   const [gameState, setGameState] = useState<GameState>({
     homeScore: 0,
     awayScore: 0,
@@ -84,13 +105,116 @@ export default function ArenaPage() {
     const unsubscribeEvent = websocketManager.onEvent((event) => {
       setEvents((prev) => [...prev, event]);
 
+      // Skor animasyonu (skor yapan oyuncunun kartında)
+      // Blok animasyonu (blok yapan oyuncunun kartında)
+      if (event.type === "block") {
+        const blockerIdRaw = event.data?.blocker_id;
+        const blockerId = typeof blockerIdRaw === "number" ? blockerIdRaw : Number(blockerIdRaw ?? NaN);
+        const blockerName = typeof event.data?.blocker_name === "string" ? event.data.blocker_name : undefined;
+        const blockerTeam = typeof event.data?.blocker_team === "string" ? event.data.blocker_team : undefined;
+        const baseKey = Date.now();
+
+        let home = null, away = null;
+        if (Number.isFinite(blockerId)) {
+          home = roster.starters.find((s) => Number(s.player.id) === blockerId);
+          away = opponentStarters.find((s) => Number(s.player.id) === blockerId);
+        }
+        if (!home && !away && blockerName) {
+          home = roster.starters.find((s) => s.player.name === blockerName);
+          away = opponentStarters.find((s) => s.player.name === blockerName);
+        }
+        if (home) {
+          setBlockAnim({ side: "home", playerId: home.player.id, key: baseKey });
+        } else if (away) {
+          setBlockAnim({ side: "away", playerId: away.player.id, key: baseKey });
+        }
+      }
+
+      // Faul animasyonu (faul yapan oyuncunun kartında)
+      if (event.type === "foul") {
+        const foulerIdRaw = event.data?.fouler_id;
+        const foulerId = typeof foulerIdRaw === "number" ? foulerIdRaw : Number(foulerIdRaw ?? NaN);
+        const foulerName = typeof event.data?.fouler_name === "string" ? event.data.fouler_name : undefined;
+        const baseKey = Date.now();
+
+        let home = null, away = null;
+        if (Number.isFinite(foulerId)) {
+          home = roster.starters.find((s) => Number(s.player.id) === foulerId);
+          away = opponentStarters.find((s) => Number(s.player.id) === foulerId);
+        }
+        if (!home && !away && foulerName) {
+          home = roster.starters.find((s) => s.player.name === foulerName);
+          away = opponentStarters.find((s) => s.player.name === foulerName);
+        }
+        if (home) {
+          setFoulAnim({ side: "home", playerId: home.player.id, key: baseKey });
+        } else if (away) {
+          setFoulAnim({ side: "away", playerId: away.player.id, key: baseKey });
+        }
+      }
+      if (event.type === "score") {
+        const scorerIdRaw = event.data?.scorer_id;
+        const scorerId = typeof scorerIdRaw === "number" ? scorerIdRaw : Number(scorerIdRaw ?? NaN);
+        const scorerName = typeof event.data?.scorer_name === "string" ? event.data.scorer_name : undefined;
+        const scorerTeam = typeof event.data?.scorer_team === "string" ? event.data.scorer_team : undefined;
+        const pointsRaw = event.data?.points;
+        const points: number = typeof pointsRaw === "number" ? pointsRaw : Number(pointsRaw ?? 0);
+        const assistHappened: boolean = Boolean(event.data?.assist);
+
+        const assisterIdRaw = event.data?.assister_id;
+        const assisterId = typeof assisterIdRaw === "number" ? assisterIdRaw : Number(assisterIdRaw ?? NaN);
+        const assisterName = typeof event.data?.assister_name === "string" ? event.data.assister_name : undefined;
+
+        if (scorerName || Number.isFinite(scorerId)) {
+          const home = roster.starters.find((s) => (Number.isFinite(scorerId) && Number(s.player.id) === scorerId) || s.player.name === scorerName);
+          const away = opponentStarters.find((s) => (Number.isFinite(scorerId) && Number(s.player.id) === scorerId) || s.player.name === scorerName);
+
+          const assistHome = assistHappened && (assisterName || Number.isFinite(assisterId))
+            ? roster.starters.find((s) => (Number.isFinite(assisterId) && Number(s.player.id) === assisterId) || s.player.name === assisterName)
+            : undefined;
+          const assistAway = assistHappened && (assisterName || Number.isFinite(assisterId))
+            ? opponentStarters.find((s) => (Number.isFinite(assisterId) && Number(s.player.id) === assisterId) || s.player.name === assisterName)
+            : undefined;
+
+          const baseKey = Date.now();
+
+          if (home) {
+            setScoreAnim({
+              side: "home",
+              playerId: home.player.id,
+              key: baseKey,
+              points,
+              assistPlayerId: assistHome?.player.id,
+              assistKey: assistHome ? baseKey + 1 : undefined,
+            });
+          } else if (away) {
+            setScoreAnim({
+              side: "away",
+              playerId: away.player.id,
+              key: baseKey,
+              points,
+              assistPlayerId: assistAway?.player.id,
+              assistKey: assistAway ? baseKey + 1 : undefined,
+            });
+          } else if (scorerTeam) {
+            // isim eşleşmezse (ör: format farkı) en azından side bilgisini kullanma şansı
+            // (şimdilik no-op)
+          }
+        }
+      }
+
       // Game state'i güncelle
       if (event.type === 'game_state' || event.type === 'quarter_start' || event.type === 'score') {
+        const team1ScoreRaw = event.data?.team1_score;
+        const team2ScoreRaw = event.data?.team2_score;
+        const quarterRaw = event.data?.quarter;
+        const timeRemainingRaw = event.data?.time_remaining_formatted;
+
         setGameState({
-          homeScore: event.data.team1_score || 0,
-          awayScore: event.data.team2_score || 0,
-          quarter: event.data.quarter || 1,
-          timeRemaining: event.data.time_remaining_formatted || "12:00",
+          homeScore: typeof team1ScoreRaw === "number" ? team1ScoreRaw : 0,
+          awayScore: typeof team2ScoreRaw === "number" ? team2ScoreRaw : 0,
+          quarter: typeof quarterRaw === "number" ? quarterRaw : 1,
+          timeRemaining: typeof timeRemainingRaw === "string" ? timeRemainingRaw : "12:00",
         });
       }
     });
@@ -221,11 +345,26 @@ export default function ArenaPage() {
           </svg>
         </button>
 
+
         {/* Players on court - left side */}
-        {starterSlots.length > 0 && <ArenaPlayers starters={starterSlots} onSwap={handleClickSwap} selected={clickSwap} />}
+        {starterSlots.length > 0 && (
+          <ArenaPlayers
+            starters={starterSlots}
+            onSwap={handleClickSwap}
+            selected={clickSwap}
+            scoreAnim={scoreAnim?.side === "home" ? scoreAnim : null}
+            blockAnim={blockAnim?.side === "home" ? blockAnim : null}
+            foulAnim={foulAnim?.side === "home" ? foulAnim : null}
+          />
+        )}
 
         {/* Opponent players - right side */}
-        <OpponentPlayers starters={opponentStarters} />
+        <OpponentPlayers
+          starters={opponentStarters}
+          scoreAnim={scoreAnim?.side === "away" ? scoreAnim : null}
+          blockAnim={blockAnim?.side === "away" ? blockAnim : null}
+          foulAnim={foulAnim?.side === "away" ? foulAnim : null}
+        />
 
         {/* Chat panel - left side */}
         <ChatPanel />
